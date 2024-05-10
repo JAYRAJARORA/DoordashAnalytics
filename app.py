@@ -33,12 +33,13 @@ st.sidebar.title("Analysis Type")
 analysis_types = [
     "Geographic Distribution of Restaurants",
     "Miscellaneous Insights",
+    "Show popular restuarants",
     "Cuisine Popularity",
     "Review Analysis",
     "Average Delivery Time by City",
     "Customer Segmentation",
     "Top Specialty Items by City",
-    "Cuisine Recommendation System"
+    "Cuisine Recommendation System",
 ]
 
 
@@ -114,7 +115,7 @@ elif choice == "Review Analysis":
     # Distribution of review ratings
     fig = px.histogram(data, x='review_rating', nbins=50, title='Distribution of Review Ratings')
     st.plotly_chart(fig)
-    data = data[data['cuisines'] != 'Miscellaneous'];
+    data = data[data['cuisines'] != 'Miscellaneous']
     # Average rating by cuisine
     avg_rating_cuisine = data.groupby('cuisines')['review_rating'].mean().sort_index().reset_index()
     fig = px.bar(avg_rating_cuisine.head(20), x='cuisines', y='review_rating', title='Average Review Rating per Cuisine')
@@ -151,7 +152,7 @@ elif choice == "Customer Segmentation":
 
 elif choice == "Top Specialty Items by City":
     st.title("Top Specialty Items by City")
-
+    
     # Explode the 'Specialty Items' column into separate rows
     data['Specialty Items'] = data['Specialty Items'].str.split('|')
     exploded_data = data.explode('Specialty Items')
@@ -185,6 +186,73 @@ elif choice == "Miscellaneous Insights":
     sns.heatmap(corr, annot=True)
     st.pyplot()
 
+
+elif choice == "Show popular restuarants":
+    # Function to clean and explode complex columns
+    def clean_and_explode(data, column):    
+        # Remove 'Miscellaneous', explode the column, and drop duplicates
+        data = data.dropna(subset=[column])
+        data[column] = data[column].apply(lambda x: x.split('|'))
+        data = data.explode(column)
+        data = data[data[column] != 'Miscellaneous']
+        return data
+
+
+    # Clean 'cuisines', 'Specialty Items', 'Dietary Preferences'
+    data = clean_and_explode(data, 'cuisines')
+
+    # Main app
+    st.title("Show popular restuarants")
+    # Assuming data preprocessing is done elsewhere in the code
+    def normalize_column(data, column_name):
+        max_value = data[column_name].max()
+        return data[column_name] / max_value
+
+    # Weighted score calculation
+    def calculate_weighted_score(data, rating_weight=0.7, count_weight=0.3):
+        # Normalize columns
+        data['normalized_rating'] = normalize_column(data, 'review_rating')
+        data['normalized_count'] = normalize_column(data, 'review_count')
+
+        # Calculate weighted score
+        data['weighted_score'] = (data['normalized_rating'] * rating_weight) + (data['normalized_count'] * count_weight)
+        return data
+
+    # Apply the function
+    data = calculate_weighted_score(data)
+    # Independent selections
+    all_cuisines = sorted(data['cuisines'].unique())
+    all_cities = sorted(data['searched_city'].unique())
+    all_restaurants = sorted(data['loc_name'].unique())
+
+    
+    selected_cities = st.multiselect('Select Cities', all_cities)
+    selected_cuisines = st.multiselect('Select Cuisines', all_cuisines)
+    selected_restaurants = st.multiselect('Select Restaurants', all_restaurants)
+
+    # Filter data based on selections
+    filtered_data = data.copy()
+    if selected_cities:
+        filtered_data = filtered_data[filtered_data['searched_city'].isin(selected_cities)]
+    if selected_cuisines:
+        filtered_data = filtered_data[filtered_data['cuisines'].isin(selected_cuisines)]
+    if selected_restaurants:
+        filtered_data = filtered_data[filtered_data['loc_name'].isin(selected_restaurants)]
+
+    # Sort by review_rating and review_count to handle ties, then pick the top 10
+    filtered_data = filtered_data.sort_values(
+        by='weighted_score', ascending=False
+        ).drop_duplicates(subset='address').head(10)
+
+    # Ensure that filtered data is not empty
+    if not filtered_data.empty:
+        # Display results
+        st.write("Top 10 Restaurants by City, Cuisine, and Restaurant Name:")
+        st.dataframe(filtered_data[['searched_city', 'loc_name', 'cuisines', 'review_rating', 'review_count', 'delivery_time', 'address']])    
+    else:
+        st.write("No data matches your selections.")
+    
+
 elif choice == "Cuisine Recommendation System":
     # Load the recommendations data
     data = pd.read_csv('recommendations.csv')
@@ -202,8 +270,4 @@ elif choice == "Cuisine Recommendation System":
         display_columns = ['searched_city', 'Predicted Cuisine', 'Predicted Specialty Item', 'Predicted Meal Type', 'Predicted Dietary Preference']
         # Display the filtered data in a table
         st.table(selected_data[display_columns])
-
-
-
-# Additional visualizations can be added by repeating similar blocks for different data insights
 
