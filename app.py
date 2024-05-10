@@ -112,20 +112,49 @@ elif choice == "Cuisine Popularity":
 
 elif choice == "Review Analysis":
     st.title("Review Rating Analysis")
+    
     # Distribution of review ratings
     fig = px.histogram(data, x='review_rating', nbins=50, title='Distribution of Review Ratings')
     st.plotly_chart(fig)
-    data = data[data['cuisines'] != 'Miscellaneous']
-    # Average rating by cuisine
-    avg_rating_cuisine = data.groupby('cuisines')['review_rating'].mean().sort_index().reset_index()
-    fig = px.bar(avg_rating_cuisine.head(20), x='cuisines', y='review_rating', title='Average Review Rating per Cuisine')
+
+    # Split 'cuisines', explode, and filter out 'Miscellaneous'
+    data['cuisines'] = data['cuisines'].str.split('|')
+    exploded_data = data.explode('cuisines')
+    exploded_data = exploded_data[exploded_data['cuisines'] != 'Miscellaneous']
+
+    # Calculate average rating and review count by cuisine
+    avg_rating_cuisine = exploded_data.groupby('cuisines').agg(
+        average_rating=pd.NamedAgg(column='review_rating', aggfunc='mean'),
+        review_count=pd.NamedAgg(column='review_rating', aggfunc='count')
+    ).reset_index()
+
+    # Filter to include only cuisines with a significant number of reviews
+    avg_rating_cuisine = avg_rating_cuisine[avg_rating_cuisine['review_count'] > 50]  # Adjust the threshold as needed
+    avg_rating_cuisine.sort_values('average_rating', ascending=False, inplace=True)
+
+    fig = px.bar(avg_rating_cuisine, x='cuisines', y='average_rating', title='Average Review Rating per Cuisine')
     st.plotly_chart(fig)
 
-    st.title("Heatmap of Review Ratings by Cuisine and City")
-    rating_pivot = data.pivot_table(index='cuisines', columns='searched_city', values='review_rating', aggfunc='mean')
-    fig = px.imshow(rating_pivot, aspect="auto", title="Average Review Ratings by Cuisine and City")
-    st.plotly_chart(fig)
+    rating_pivot = exploded_data.pivot_table(
+        index='cuisines',
+        columns='searched_city',
+        values='review_rating',
+        aggfunc='mean',
+        fill_value=0,
+        
+    )
+    # Heatmap of Review Ratings by Cuisine and City
+    fig = px.imshow(rating_pivot, aspect="auto", title="Average Review Ratings by Cuisine and City", height=600, color_continuous_scale=[(0, 'lightblue'), (1, 'darkblue')] )
 
+    fig.update_layout(
+        coloraxis_colorbar=dict(
+            title='Average Ratings', 
+            ticks='outside',
+            tickvals=[rating_pivot.min().min(), rating_pivot.max().max()]
+        )
+    )
+
+    st.plotly_chart(fig)
 
 
 elif choice == "Average Delivery Time by City":
@@ -169,13 +198,12 @@ elif choice == "Top Specialty Items by City":
     st.plotly_chart(fig)
 
 
-elif choice == "Miscellaneous Insights":
-    st.title("Miscellaneous Insights")
+elif choice == "Generic Insights":
+    st.title("Generic Insights")
     # Distance vs Delivery Time
     fig = px.scatter(data, x='distance', y='delivery_time', title='Distance vs. Delivery Time', trendline="ols")
     st.plotly_chart(fig)
 
-    st.title("Customer Rating vs. Review Count Analysis")
     fig = px.scatter(data, x='review_count', y='review_rating', title="Review Count vs. Customer Rating", trendline="ols")
     st.plotly_chart(fig)
 
