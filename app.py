@@ -7,9 +7,6 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import KMeans
 import numpy as np
 
-# Initialize the Spark session if using PySpark for some operations
-from pyspark.sql import SparkSession
-spark = SparkSession.builder.master("local[*]").appName("DoorDash Analysis").getOrCreate()
 
 st.set_page_config(page_title='DoorDash Data Analysis', layout='wide')
 
