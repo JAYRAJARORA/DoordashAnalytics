@@ -1,0 +1,20 @@
+searched_city,Predicted Cuisine,Expected Cuisine,Predicted Specialty Item,Expected Specialty Item,Predicted Meal Type,Expected Meal Type,Predicted Dietary Preference,Expected Dietary Preference
+Anaheim,Mediterranean,American,Sandwiches,Tacos,Lunch,Lunch,Vegetarian,Vegan
+Boston,French,American,Salad,Sandwiches,Beverages,Lunch,Gluten-Free,Gluten-Free
+Brooklyn,Seafood,American,Indian,Burgers,Appetizers,Dinner,Vegetarian,Vegetarian
+Burbank,Mexican,Mexican,Tacos,Tacos,Breakfast,Beverages,Vegetarian,Vegan
+Cambridge,American,Seafood,Burgers,Salad,Breakfast,Beverages,Vegetarian,Gluten-Free
+Charlestown,American,Seafood,Tacos,Salad,Lunch,Beverages,Gluten-Free,Gluten-Free
+Chicago,Italian,American,Indian,Sandwiches,Beverages,Appetizers,Gluten-Free,Vegan
+Dorchester,French,American,Salad,Sandwiches,Breakfast,Lunch,Gluten-Free,Gluten-Free
+Glendale,Vietnamese,Mexican,Ramen,Tacos,Beverages,Beverages,Vegan,Vegan
+Glenview,American,American,Tacos,Tacos,Lunch,Lunch,Gluten-Free,Vegan
+Irvine,American,American,Tacos,Tacos,Lunch,Lunch,Gluten-Free,Vegan
+Jersey City,Mediterranean,American,Sandwiches,Tacos,Beverages,Beverages,Vegetarian,Vegetarian
+Los Angeles,Japanese,Mexican,Salad,Tacos,Beverages,Beverages,Vegan,Vegan
+Manhattan Beach,Seafood,American,American,Tacos,Lunch,Beverages,Vegan,Vegan
+New York,Indian,American,Salad,Burgers,Appetizers,Dinner,Vegetarian,Vegetarian
+Staten Island,Middle Eastern,American,Middle Eastern,Tacos,Beverages,Beverages,Vegetarian,Vegetarian
+Torrance,Seafood,American,Salad,Tacos,Beverages,Beverages,Gluten-Free,Vegan
+Weehawken,Middle Eastern,American,Sandwiches,Tacos,Beverages,Beverages,Vegetarian,Vegetarian
+West Covina,Seafood,American,American,Tacos,Beverages,Beverages,Gluten-Free,Gluten-Free
